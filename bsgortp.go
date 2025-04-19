@@ -1,3 +1,5 @@
+// The bsgortp package provides a simple and elegant way to quickly generate
+// Rich Text Facets when working with
 package bsgortp
 
 import (
@@ -6,20 +8,31 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/bluesky-social/indigo/api/bsky"
 	"github.com/bluesky-social/indigo/api/atproto"
+	"github.com/bluesky-social/indigo/api/bsky"
 	"github.com/bluesky-social/indigo/xrpc"
 )
 
-// All of these regular expressions are candidates for improvement, especially
-// the tag expression which I feel could be done a lot better.
+// *TODO Improve and test regex for reliability and stability.
 const LINK_EXP = `(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\` +
 	`.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)`
+
+// Regex based on based on:
+// https://atproto.com/specs/handle#handle-identifier-syntax as described on
+// https://docs.bsky.app/docs/advanced-guides/post-richtext#rich-text-facets
 const MENTION_EXP = `(@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)` +
-	`+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)` 
-const TAG_EXP = `(?:^|\s)(#[^\d\s]\S*)(\s)?`
+	`+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)`
+
+// Regex based on this stack overflow thread, but with modifications:
+// https://stackoverflow.com/a/38383605
+const TAG_EXP = `#(\w*[0-9a-zA-Z]+[\w\-]*[0-9a-zA-Z])`
+
 const BSKY_BASE_URL = "https://bsky.social"
 
+// FacetGenResult is a wrapper for the Rich Text Facets that facet generator
+// functions output. If it was successful, the array will be filled and `Error`
+// will be `nil`. Elsewise, the `Facets` field will be `nil` and `Error` will
+// feature an `error` value.
 type FacetGenResult struct {
 	Facets []*bsky.RichtextFacet
 	Error  error
@@ -61,7 +74,7 @@ func GenPost(text string, langs []string) (*bsky.FeedPost, error) {
 // helper functions to parse.
 func genFacets(text string) ([]*bsky.RichtextFacet, error) {
 	facetChan := make(chan *FacetGenResult, 3)
-	
+
 	go genMentionFacets(text, facetChan)
 	go genLinkFacets(text, facetChan)
 	go genTagFacets(text, facetChan)
@@ -69,7 +82,6 @@ func genFacets(text string) ([]*bsky.RichtextFacet, error) {
 	facets := []*bsky.RichtextFacet{}
 
 	for range 3 {
-		fmt.Println("receiving res")
 		facetGenResult := <-facetChan
 		if facetGenResult.Error != nil {
 			return nil, facetGenResult.Error
@@ -81,7 +93,6 @@ func genFacets(text string) ([]*bsky.RichtextFacet, error) {
 }
 
 func genLinkFacets(text string, c chan<- *FacetGenResult) {
-	fmt.Println("starting link gen")
 	r, err := regexp.Compile(LINK_EXP)
 	if err != nil {
 		err := fmt.Errorf(
@@ -125,7 +136,6 @@ func genLinkFacets(text string, c chan<- *FacetGenResult) {
 		}
 
 		facets = append(facets, &facet)
-
 	}
 
 	c <- &FacetGenResult{Facets: facets, Error: nil}
@@ -158,7 +168,7 @@ func genMentionFacets(text string, c chan<- *FacetGenResult) {
 
 	facets := []*bsky.RichtextFacet{}
 	client := &xrpc.Client{
-		Host:   BSKY_BASE_URL,	
+		Host: BSKY_BASE_URL,
 	}
 
 	for i := range mentionMatches {
@@ -173,11 +183,11 @@ func genMentionFacets(text string, c chan<- *FacetGenResult) {
 				"could not resolve handle=%s, error : %w",
 				mentionMatches[i],
 				err,
-			)	
+			)
 			c <- &FacetGenResult{Facets: nil, Error: wrappedErr}
 			return
 		}
-		
+
 		facetMention := bsky.RichtextFacet_Mention{
 			LexiconTypeID: "abb.bsky.richtext.facet#mention",
 			Did:           handleOutput.Did,
@@ -229,7 +239,7 @@ func genTagFacets(text string, c chan<- *FacetGenResult) {
 	for i := range tagMatches {
 		facetTag := bsky.RichtextFacet_Tag{
 			LexiconTypeID: "abb.bsky.richtext.facet#tag",
-			Tag:           tagMatches[i],
+			Tag:           tagMatches[i][1:],
 		}
 
 		facetElem := bsky.RichtextFacet_Features_Elem{
@@ -246,6 +256,6 @@ func genTagFacets(text string, c chan<- *FacetGenResult) {
 
 		facets = append(facets, &facet)
 	}
-	
+
 	c <- &FacetGenResult{Facets: facets, Error: nil}
 }
