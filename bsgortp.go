@@ -118,6 +118,9 @@ func genLinkFacets(text string, c chan<- *FacetGenResult) {
 	facets := []*bsky.RichtextFacet{}
 
 	for i := range urlMatches {
+		if urlMatches[0] == "@" {
+			continue
+		}
 		facetLink := bsky.RichtextFacet_Link{
 			LexiconTypeID: "abb.bsky.richtext.facet#link",
 			Uri:           urlMatches[i],
