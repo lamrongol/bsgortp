@@ -118,11 +118,11 @@ func genLinkFacets(text string, c chan<- *FacetGenResult) {
 	facets := []*bsky.RichtextFacet{}
 
 	for i := range urlMatches {
-		if urlMatches[0] == "@" {
+		if []rune(urlMatches[i])[0] == '@' {
 			continue
 		}
 		facetLink := bsky.RichtextFacet_Link{
-			LexiconTypeID: "abb.bsky.richtext.facet#link",
+			LexiconTypeID: "app.bsky.richtext.facet#link",
 			Uri:           urlMatches[i],
 		}
 
@@ -192,7 +192,7 @@ func genMentionFacets(text string, c chan<- *FacetGenResult) {
 		}
 
 		facetMention := bsky.RichtextFacet_Mention{
-			LexiconTypeID: "abb.bsky.richtext.facet#mention",
+			LexiconTypeID: "app.bsky.richtext.facet#mention",
 			Did:           handleOutput.Did,
 		}
 
@@ -241,7 +241,7 @@ func genTagFacets(text string, c chan<- *FacetGenResult) {
 
 	for i := range tagMatches {
 		facetTag := bsky.RichtextFacet_Tag{
-			LexiconTypeID: "abb.bsky.richtext.facet#tag",
+			LexiconTypeID: "app.bsky.richtext.facet#tag",
 			Tag:           tagMatches[i][1:],
 		}
 
