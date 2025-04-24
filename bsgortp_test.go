@@ -52,6 +52,20 @@ func TestPostsWithLinks(t *testing.T) {
 			0,
 			16,
 		},
+		{
+			"my website is jakeabed.dev",
+			"https://jakeabed.dev",
+			1,
+			14,
+			26,
+		},
+		{
+			"http://scooby.doo redirects to jakeabed.dev",
+			"http://scooby.doo",
+			2,
+			0,
+			17,
+		},
 	}
 
 	for _, tt := range tests {
@@ -89,4 +103,45 @@ func TestPostsWithLinks(t *testing.T) {
 				idx.ByteEnd, tt.ExpectedByteEnd)
 		}
 	}
+}
+
+func TestAllInOne(t *testing.T) {
+	post, err := GenPost(
+		"Hey @jakeabed.dev, jakeabed.dev is a #buggy site",
+		[]string{"en"},
+	)
+	if err != nil {
+		t.Errorf("error generating post: %s", err.Error())
+	}
+
+	if len(post.Facets) != 3 {
+		t.Errorf("expected 3 facets, got=%d", len(post.Facets))
+	}
+
+	third := post.Facets[0].Features[0]
+	second := post.Facets[1].Features[0]
+	first := post.Facets[2].Features[0]
+
+	if first.RichtextFacet_Mention == nil {
+		t.Errorf("expected first facet to be mention!")
+	}
+
+	if second.RichtextFacet_Link == nil {
+		t.Errorf("expected second facet to be link!")
+	}
+
+	if third.RichtextFacet_Tag == nil {
+		t.Errorf("expected third facet to be tag!")
+	}
+
+	if second.RichtextFacet_Link.Uri != "https://jakeabed.dev" {
+		t.Errorf("second facet uri wrong, got=%s expected=%s",
+			second.RichtextFacet_Link.Uri, "https://jakeabed.dev")
+	}
+
+	if third.RichtextFacet_Tag.Tag != "buggy" {
+		t.Errorf("third facet tag wrong, got=%s expected=%s",
+			third.RichtextFacet_Tag.Tag, "buggy")
+	}
+
 }

@@ -118,12 +118,25 @@ func genLinkFacets(text string, c chan<- *FacetGenResult) {
 	facets := []*bsky.RichtextFacet{}
 
 	for i := range urlMatches {
-		if []rune(urlMatches[i])[0] == '@' {
+		url := urlMatches[i]
+
+		if []rune(url)[0] == '@' {
 			continue
 		}
+
+		if len(url) > 7 {
+			firstSeven := url[0:7]
+
+			if firstSeven != "https:/" && firstSeven != "http://" {
+				url = "https://" + url
+			}
+		} else {
+			url = "https://" + url
+		}
+
 		facetLink := bsky.RichtextFacet_Link{
 			LexiconTypeID: "app.bsky.richtext.facet#link",
-			Uri:           urlMatches[i],
+			Uri:           url,
 		}
 
 		facetElem := bsky.RichtextFacet_Features_Elem{
