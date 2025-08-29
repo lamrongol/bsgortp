@@ -23,9 +23,9 @@ const LINK_EXP = `(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\` +
 const MENTION_EXP = `(@([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)` +
 	`+[a-zA-Z]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)`
 
-// Regex based on this stack overflow thread, but with modifications:
-// https://stackoverflow.com/a/38383605
-const TAG_EXP = `#(\w*[0-9a-zA-Z]+[\w\-]*[0-9a-zA-Z])`
+// atproto regexp on https://github.com/bluesky-social/atproto/blob/f65afa33f5efd257a29c69985cbfb895771a2580/packages/api/src/rich-text/util.ts#L10
+// can't be used on golang
+const TAG_EXP = `[#＃][\p{L}0-9_-]+`
 
 const BSKY_BASE_URL = "https://bsky.social"
 
