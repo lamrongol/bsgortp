@@ -1,8 +1,8 @@
-module github.com/jake-abed/bsgortp
+module github.com/lamrongol/bsgortp
 
-go 1.23.5
+go 1.25
 
-require github.com/bluesky-social/indigo v0.0.0-20250417233640-6b0010a646ae
+require github.com/bluesky-social/indigo v0.0.0-20250829235942-28dfd3538849
 
 require (
 	github.com/carlmjohnson/versioninfo v0.22.5 // indirect
