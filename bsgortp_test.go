@@ -107,7 +107,7 @@ func TestPostsWithLinks(t *testing.T) {
 
 func TestAllInOne(t *testing.T) {
 	post, err := GenPost(
-		"Hey @jakeabed.dev, jakeabed.dev is a #buggy site #おはようVtuber https://github.com/jake-abed/bsgortp http://bsky.app/ duckduckgo.com/?q=bsgortp",
+		"Hey @jakeabed.dev, jakeabed.dev is a #buggy site #おはようVtuber https://github.com/jake-abed/bsgortp http://bsky.app/ staging.bsky.app/search?q=%E6%9C%AC%E5%85%AC%E6%BC%94+lang%3Aja ",
 		[]string{"en"},
 	)
 	if err != nil {
@@ -176,9 +176,8 @@ func TestAllInOne(t *testing.T) {
 		t.Errorf("sixth facet uri wrong, got=%s expected=%s",
 			sixth.RichtextFacet_Link.Uri, "http://bsky.app/")
 	}
-	if seventh.RichtextFacet_Link.Uri != "https://duckduckgo.com/?q=bsgortp" {
+	if seventh.RichtextFacet_Link.Uri != "https://staging.bsky.app/search?q=%E6%9C%AC%E5%85%AC%E6%BC%94+lang%3Aja" {
 		t.Errorf("seventh facet uri wrong, got=%s expected=%s",
-			seventh.RichtextFacet_Link.Uri, "https://duckduckgo.com/?q=bsgortp")
+			seventh.RichtextFacet_Link.Uri, "https://staging.bsky.app/search?q=%E6%9C%AC%E5%85%AC%E6%BC%94+lang%3Aja")
 	}
-
 }

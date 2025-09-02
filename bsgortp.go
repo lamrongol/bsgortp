@@ -144,11 +144,12 @@ func genLinkFacets(text string) (string, []*bsky.RichtextFacet, error) {
 			linkUrl = "https://" + originalUrl
 		}
 
+		if len(urlStr) > UrlLengthLimit {
+			urlStr = urlStr[:UrlLengthLimit-2] + ".."
+		}
+
+		//replace only first
 		if urlStr != originalUrl {
-			if len(urlStr) > UrlLengthLimit {
-				urlStr = urlStr[:UrlLengthLimit-2] + ".."
-			}
-			//replace only first
 			text = strings.Replace(text, originalUrl, urlStr, 1)
 		}
 
